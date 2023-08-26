@@ -46,14 +46,14 @@
             inherit src buildInputs nativeBuildInputs;
           };
           cargoArtifacts = craneLib.buildDepsOnly(commonArgs // {
-            cargoBuildCommand = "cargo build --profile dev";
+            cargoBuildCommand = "cargo build --locked --profile dev";
             cargoExtraArgs = "--bin crane-bug";
             doCheck = false;
             pname = "crane-bug";
           });
           binary = craneLib.buildPackage(commonArgs // {
             inherit cargoArtifacts;
-            cargoBuildCommand = "cargo build --profile dev";
+            cargoBuildCommand = "cargo build --locked --profile dev";
             cargoExtraArgs = "--bin crane-bug";
             doCheck = false;
             pname = "crane-bug";
