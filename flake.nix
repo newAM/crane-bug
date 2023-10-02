@@ -40,29 +40,41 @@
             ;
           };
           nativeBuildInputs = with pkgs; [rustToolchain pkg-config];
-          buildInputs = with pkgs; [rustToolchain openssl postgresql_15.lib];
-          developmentTools = with pkgs; [(diesel-cli.override {sqliteSupport = false; mysqlSupport = false;}) postgresql cargo];
+          buildInputs = with pkgs; [rustToolchain openssl];
+          developmentTools = with pkgs; [cargo];
           commonArgs = {
             inherit src buildInputs nativeBuildInputs;
           };
-          cargoArtifacts = craneLib.buildDepsOnly(commonArgs // {
+          cargoDebugArtifacts = craneLib.buildDepsOnly(commonArgs // {
             cargoBuildCommand = "cargo build --locked --profile dev";
+            cargoExtraArgs = "--bin crane-bug";
+            doCheck = false;
+            pname = "crane-bug";
+          });
+          debugBinary = craneLib.buildPackage(commonArgs // {
+            inherit cargoDebugArtifacts;
+            cargoBuildCommand = "cargo build --locked --profile dev";
+            cargoExtraArgs = "--bin crane-bug";
+            doCheck = false;
+            pname = "crane-bug";
+          });
+          cargoArtifacts = craneLib.buildDepsOnly(commonArgs // {
+            cargoBuildCommand = "cargo build --locked --profile release";
             cargoExtraArgs = "--bin crane-bug";
             doCheck = false;
             pname = "crane-bug";
           });
           binary = craneLib.buildPackage(commonArgs // {
             inherit cargoArtifacts;
-            cargoBuildCommand = "cargo build --locked --profile dev";
+            cargoBuildCommand = "cargo build --locked --profile release";
             cargoExtraArgs = "--bin crane-bug";
-            doCheck = false;
             pname = "crane-bug";
           });
         in
         with pkgs;
         {
           packages = {
-            inherit binary;
+            inherit binary debugBinary;
             default = binary;
           };
           devShells.default = mkShell {
